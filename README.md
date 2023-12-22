@@ -1,3 +1,4 @@
 # Mern-Blog-Website
-A full-stack MERN app with JWT authentication.
-Can view/create/edit/delete blogs stored in the Cloud MongoDb with login features.
+- A Full-Stack MERN website for blogs.
+- Can view/create/edit/delete blogs stored in the Cloud MongoDb with login features.
+- Uses Context API state management and JWT Authentication.
