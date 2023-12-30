@@ -6,6 +6,7 @@ const jwt = require('jsonwebtoken')
 const mongoose = require('mongoose')
 const cookieParser = require('cookie-parser')
 const fs = require('fs')
+const dotenv = require('dotenv')
 const multer = require('multer')
 const uploadMiddleware = multer({ dest: 'uploads/' })
 
@@ -22,8 +23,15 @@ app.use(cors({credentials: true, origin: 'http://localhost:3000'}))      //to al
 app.use(express.json())                                                  //parses incoming json payload (had to use bodyparser earlier, now is built-in)
 app.use(cookieParser())                                                  //parses incoming cookies
 app.use('/uploads', express.static(__dirname + '/uploads'))
+dotenv.config()
 
-mongoose.connect('mongodb+srv://blog:aqcMBRpgt9iSEH0v@cluster0.fgv4pq0.mongodb.net/?retryWrites=true&w=majority')
+//server
+mongoose.connect(process.env.CONNECTION_URL)
+        .then(() => app.listen(PORT, () => {
+            console.log("Server running on port " + PORT)
+        }))
+        .catch(err => console.log(err.message))
+
 
 app.post('/register', async (req, res) => {
     const {username, password} = req.body
@@ -58,10 +66,14 @@ app.post('/login', async (req, res) => {
 
 app.get('/profile', (req, res) => {
     const {token} = req.cookies
-    jwt.verify(token, secret, {}, (err, info) => {                                  //verify token from the cookie and send userInfo 
-        if(err) throw err
-        res.json(info)
-    })
+    if(token){
+        jwt.verify(token, secret, {}, (err, info) => {                                  //verify token from the cookie and send userInfo 
+            if(err) throw err
+            res.json(info)
+        })
+    } else {
+        res.json('Error')
+    }    
 })
 
 app.post('/logout', (req, res) => {
@@ -80,18 +92,21 @@ app.post('/post', uploadMiddleware.single('file') , async (req, res) => {
 
     //verify token for author's User Id
     const {token} = req.cookies
-    jwt.verify(token, secret, {}, async (err, info) => {                                  //verify token from the cookie and send userInfo 
-        if(err) throw err
-        //creating Post document to the database
-        const postDoc = await PostModel.create({
-            title,
-            summary,
-            content,
-            cover: newPath,
-            author: info.id
-        })
-        res.json(postDoc)
-    })    
+    if(token){
+        jwt.verify(token, secret, {}, async (err, info) => {                                  //verify token from the cookie and send userInfo 
+            if(err) throw err
+            //creating Post document to the database
+            const postDoc = await PostModel.create({
+                title,
+                summary,
+                content,
+                cover: newPath,
+                author: info.id
+            })
+            res.json(postDoc)
+        }) 
+    }
+       
 })
 
 app.get('/post', async (req, res) => {
@@ -123,24 +138,27 @@ app.put('/post', uploadMiddleware.single('file'), async (req, res) => {
 
     //verify token for author's User Id
     const {token} = req.cookies
-    jwt.verify(token, secret, {}, async (err, info) => {                                  //verify token from the cookie and send userInfo 
-        if(err) throw err
-        const {id, title, content, summary} = req.body
-        const postDoc = await PostModel.findById(id)
-        //check if author id is equal to the current user id
-        const isAuthor = JSON.stringify(postDoc.author) === JSON.stringify(info.id);
-        if (!isAuthor) {
-            return res.status(400).json('you are not the author');
-        }
-        await postDoc.updateOne({
-            title,
-            summary,
-            content,
-            cover: newPath ? newPath : postDoc.cover,   //update if there is new image
-        });
-
-        res.json(postDoc)
-    })    
+    if(token){
+        jwt.verify(token, secret, {}, async (err, info) => {                                  //verify token from the cookie and send userInfo 
+            if(err) throw err
+            const {id, title, content, summary} = req.body
+            const postDoc = await PostModel.findById(id)
+            //check if author id is equal to the current user id
+            const isAuthor = JSON.stringify(postDoc.author) === JSON.stringify(info.id);
+            if (!isAuthor) {
+                return res.status(400).json('you are not the author');
+            }
+            await postDoc.updateOne({
+                title,
+                summary,
+                content,
+                cover: newPath ? newPath : postDoc.cover,   //update if there is new image
+            });
+    
+            res.json(postDoc)
+        })
+    }
+        
 })
 
 app.delete('/delete/:id', async (req, res) => {
@@ -148,18 +166,19 @@ app.delete('/delete/:id', async (req, res) => {
 
     //verify token for author's User Id
     const {token} = req.cookies
-    jwt.verify(token, secret, {}, async (err, info) => {                                  //verify token from the cookie and send userInfo 
-        if(err) throw err
-        const postDoc = await PostModel.findById(id)
-        //check if author id is equal to the current user id
-        const isAuthor = JSON.stringify(postDoc.author) === JSON.stringify(info.id);
-        if (!isAuthor) {
-            return res.status(400).json('you are not the author');
-        }
-        await postDoc.deleteOne({_id: id})
-        res.json(postDoc)
-    })
+    if(token){
+        jwt.verify(token, secret, {}, async (err, info) => {                                  //verify token from the cookie and send userInfo 
+            if(err) throw err
+            const postDoc = await PostModel.findById(id)
+            //check if author id is equal to the current user id
+            const isAuthor = JSON.stringify(postDoc.author) === JSON.stringify(info.id);
+            if (!isAuthor) {
+                return res.status(400).json('you are not the author');
+            }
+            await postDoc.deleteOne({_id: id})
+            res.json(postDoc)
+        })
+    }    
 })
 
-app.listen(PORT, () => console.log(`Server started at port ${PORT}`))
 
