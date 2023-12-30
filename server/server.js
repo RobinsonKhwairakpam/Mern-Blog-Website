@@ -15,7 +15,7 @@ const PostModel = require('./models/Post')
 
 const PORT = process.env.PORT || 8000
 const salt = bcrypt.genSaltSync(10)
-const secret = 'asdwqe12314dsf12sdas'
+const secret = process.env.JWT_SECRET
 
 //initialise middleware 
 //cors to allow cross origin between client and server
