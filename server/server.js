@@ -20,7 +20,7 @@ const secret = process.env.JWT_SECRET
 
 //initialise middleware 
 //cors to allow cross origin between client and server
-app.use(cors({credentials: true, origin: 'http://localhost:3000'}))      //to allow cookies as credentials in the front end port    
+app.use(cors({credentials: true, origin: 'https://mern-blog-website-123.netlify.app/'}))      //to allow cookies as credentials in the front end port    
 app.use(express.json())                                                  //parses incoming json payload (had to use bodyparser earlier, now is built-in)
 app.use(cookieParser())                                                  //parses incoming cookies
 app.use('/uploads', express.static(__dirname + '/uploads'))
