@@ -16,7 +16,7 @@ const Home = () => {
   },[])
 
   return (
-    <div className='mb-10 mt-6'>
+    <div className='mb-10 mt-6 px-4'>
         {
           posts.length === 0 ?
             <h1 className='text-neutral-400 text-2xl mt-10'>No blogs currently ...</h1> 

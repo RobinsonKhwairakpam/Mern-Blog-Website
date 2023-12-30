@@ -13,6 +13,7 @@ const uploadMiddleware = multer({ dest: 'uploads/' })
 const UserModel = require('./models/User')
 const PostModel = require('./models/Post')
 
+dotenv.config()
 const PORT = process.env.PORT || 8000
 const salt = bcrypt.genSaltSync(10)
 const secret = process.env.JWT_SECRET
@@ -23,7 +24,6 @@ app.use(cors({credentials: true, origin: 'http://localhost:3000'}))      //to al
 app.use(express.json())                                                  //parses incoming json payload (had to use bodyparser earlier, now is built-in)
 app.use(cookieParser())                                                  //parses incoming cookies
 app.use('/uploads', express.static(__dirname + '/uploads'))
-dotenv.config()
 
 //server
 mongoose.connect(process.env.CONNECTION_URL)

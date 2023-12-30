@@ -15,7 +15,7 @@ function App() {
     <UserContextProvider>
       <Router>
         <Navbar />        
-        <div className="max-w-screen-md mx-auto">  
+        <div className="max-w-screen-md mx-auto font-[Poppins] ">  
           <Routes>
             <Route path="/" element={<Home />} /> 
             <Route path="/about" element={<About />} />   
